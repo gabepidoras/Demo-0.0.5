@@ -22,13 +22,19 @@ The project showcases the transition from legacy Java tech (JDBC、JSP、Servlet
 ---
 
 ## 🛠 Tech Stack / 使用技術
-- **Backend:** Java 21, Spring Boot 4.0.2
-- **Real-time:** **Spring WebSocket (STOMP)** — For instant updates / リアルタイム更新
-- **Security:** Spring Security (Authentication, BCrypt, CSRF protection)
-- **Database:** MySQL 8.0 (Persistence via JPA)
+
+### Backend / バックエンド
+- **Language:** Java 21 (LTS)
+- **Framework:** Spring Boot 4.0.2
+- **Security:** Spring Security (Session-based, BCrypt Hashing)
+- **Database:** MySQL 8 (Spring Data JPA, Hibernate)
+- **Real-time:** Spring WebSocket (STOMP)
+
+### Frontend / フロントエンド
+- **Language:** JavaScript (ES6+)
+- **Protocol:** STOMP.js & SockJS (Real-time Communication) / 非同期通信・DOM操作
+- **Styling:** HTML5 & CSS3 (Modern UI/UX)
 - **View Engine:** Thymeleaf (Server-Side Rendering)
-- **Frontend:** **JavaScript (Vanilla)** — For WebSocket client & Dynamic DOM updates / 非同期通信・DOM操作
-- **Utilities:** Project Lombok
 
 ---
 
