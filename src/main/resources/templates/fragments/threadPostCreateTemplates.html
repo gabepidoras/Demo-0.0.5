@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="threadPostCreateTemplates" style="display: none;">
+
+    <template id="thread-template">
+        <div class="thread-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="flex-grow: 1;">
+                    <div class="thread-title js-thread-title"></div>
+                    <div style="font-size: 0.7rem; color: #666;" class="js-thread-date"></div>
+                </div>
+
+                <button class="js-toggle-btn"
+                        style="font-size: 20px; background: none; border: none; color: #00ffff; cursor: pointer;">
+                    &#9660;
+                </button>
+            </div>
+
+            <div class="thread-author">
+                ユーザー名: <span class="js-thread-author"></span>
+            </div>
+
+            <div class="js-owner-controls" style="display: none; gap: 10px; margin-top: 10px;">
+                <button class="js-edit-btn" data-type="thread" style="background-color: #0088cc; color:white;">
+                    編集
+                </button>
+                <button class="js-delete-btn" type="button" style="background-color:#cc0000; color: white;">
+                    削除
+                </button>
+            </div>
+
+            <div class="js-posts-container" style="display: none; margin-top: 20px; border-top: 1px dashed #ff00de;">
+                <div class="js-empty-msg" style="text-align: center; color: #666; padding: 10px;">
+                    最初のメッセージを投稿しよう
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <form method="post">
+                         <textarea name="content" required
+                                   style="width: 97%; height: 100px; resize: none; padding: 8px; margin-bottom: 5px; border-color: #ff00de; box-shadow: 0 0 3px #ff00de;"></textarea>
+                        <button type="submit">投稿</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="post-template">
+        <div class="post-item" style="padding: 10px 0; border-bottom: 1px dashed #ff00de;">
+            <div style="font-size: 0.9rem; color: #ff00de;">
+                <span class="js-post-number"></span>.
+                <span class="js-post-author" style="font-weight: bold;"></span>
+                <span class="js-post-date" style="font-size: 0.7rem; color: #666; margin-left: 10px;"></span>
+            </div>
+
+            <div class="post-content js-post-content"></div>
+
+            <div class="js-post-owner-controls" style="display: none; gap: 10px; margin-top: 10px;">
+                <button class="js-post-edit-btn" data-type="post" style="white-space: nowrap; background-color: #0088cc; color:white; border: none; border-radius: 3px; padding: 4px 10px; font-size: 1rem; cursor: pointer;">
+                    編集
+                </button>
+                <button class="js-post-delete-btn" type="button" style="white-space: nowrap; background-color:#cc0000; color: white; border: none; border-radius: 3px; padding: 4px 10px; font-size: 1rem; cursor: pointer;">
+                    削除
+                </button>
+            </div>
+        </div>
+    </template>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>掲示板</title>
+
+    <link rel="stylesheet" th:href="@{/css/userstyle.css}">
+</head>
+<body>
+
+<h1>ログインシステム</h1>
+
+<p th:text="${message}" class="success"></p>
+
+<p th:text="${error}" class="error" style="text-align: center"></p>
+<div th:if="${param.error != null and param.error[0] == 'auth_required'}"
+     style="color: #ffff00; text-align: center; border: 1px dashed #ffff00; padding: 10px; margin-bottom: 15px; background: rgba(255, 255, 0, 0.1);">
+    投稿するにはログインが必要です
+</div>
+
+<div class="nav-buttons">
+    <button onclick="toggle('login')">ログイン</button>
+    <button onclick="toggle('reg')" style="border-color: #ff00de; color: #ff00de; box-shadow: 0 0 10px #ff00de;">新登録</button>
+    <a th:href="@{/threads}" style="text-decoration: none;">
+        <button type="button" style="border-color: #00ff00; color: #00ff00; box-shadow: 0 0 10px #00ff00; cursor: pointer;">
+            掲示板へ
+        </button>
+    </a>
+</div>
+
+<div id="login" th:class="${registerActive} ? 'form-container' : 'form-container active'">
+    <h3 style="text-align: center; color: #00ffff; margin-top: 0;">ログイン</h3>
+    <form action="/login" method="post">
+        <div class="input-group">
+            <input type="text" name="username" placeholder="ユーザー名 (Username)" required>
+        </div>
+        <div class="input-group">
+            <input type="password" name="password" placeholder="パスワード (Password)" required>
+        </div>
+        <button type="submit" class="btn-login-submit">ログイン</button>
+    </form>
+</div>
+
+<div th:if="${param.error != null and param.error[0] == 'true'}"
+     style="color: red; text-align: center; border: 1px dashed red; padding: 10px; margin-top: 10px; background: rgba(255, 255, 0, 0.1);">
+    ログインに失敗しました。ユーザー名またはパスワードが間違っています。
+</div>
+
+<div id="reg" th:class="${registerActive} ? 'form-container active' : 'form-container'">
+    <h3 style="text-align: center; color: #ff00de; margin-top: 0;">新登録</h3>
+    <form action="/register" method="post">
+
+        <div class="input-group">
+            <input type="text" id="regUser" name="username" placeholder="ユーザー名" required oninput="validateUser()">
+            <span th:if="${usernameError}" th:text="${usernameError}" class="error-hint"></span>
+            <span id="msgUser" class="js-error">3から15までの字が入力しなければならない！</span>
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="regPass" name="password" placeholder="パスワード" required oninput="validatePass()">
+            <span th:if="${passwordError}" th:text="${passwordError}" class="error-hint"></span>
+            <span id="msgPass" class="js-error">パスワードが短すぎます (最小6字)</span>
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="regConfirm" name="confirmPassword" placeholder="確認するパスワード" required oninput="validateConfirm()">
+            <span th:if="${confirmError}" th:text="${confirmError}" class="error-hint"></span>
+            <span id="msgConfirm" class="js-error">パスワードが一致しません</span>
+        </div>
+
+        <button type="submit" class="btn-register-submit">
+            新登録
+        </button>
+    </form>
+</div>
+
+<script th:src="@{/js/userscript.js}"></script>
+<script th:src="@{/js/errorscript.js}"></script>
+
+</body>
+</html>

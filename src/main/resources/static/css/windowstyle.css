@@ -1,0 +1,32 @@
+.modal {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4); /* Полупрозрачный фон */
+}
+.modal-content {
+    background-color: rgba(0, 0, 0, 0.9);
+    margin: 15% auto; /* Отступ сверху/снизу */
+    padding: 20px;
+    border: 2px solid #00ffff;
+    width: 80%; /* Или фиксированная ширина */
+    max-width: 500px;
+    box-shadow: 0 0 10px #ff00de;
+}
+.close-btn {
+    color: #ff00de;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.close-btn:hover,
+.close-btn:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+        xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>スレット共有</title>
+
+<!--    <meta name="_csrf" th:content="${_csrf.token}"/>-->
+<!--    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>-->
+
+    <link rel="stylesheet" th:href="@{/css/userstyle.css}">
+    <link rel="stylesheet" th:href="@{/css/threadsstyle.css}">
+    <link rel="stylesheet" th:href="@{/css/windowstyle.css}">
+</head>
+
+<body>
+
+<h1>スレッド一覧</h1>
+
+<div th:if="${param.error}" class="error-alert"
+     style="color: red; text-align: center; border: 1px dashed red; padding: 10px; margin-bottom: 15px; background: rgba(255, 255, 0, 0.1);">
+    <span th:if="${param.error[0] == 'thread_too_long'}" th:text="'内容は30文字以内で入力してください'"></span>
+    <span th:if="${param.error[0] == 'post_too_long'}" th:text="'内容は300文字以内で入力してください'"></span>
+    <span th:if="${param.error[0] == 'blank'}" th:text="'内容を入力してください'"></span>
+</div>
+
+<div style="margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #444;">
+    <div sec:authorize="isAuthenticated()">
+        ログイン中: <span sec:authentication="name" style="color: #00ff00;">ユーザー名</span>
+        <form th:action="@{/logout}" method="post" style="display: inline; margin-left: 20px;">
+            <button type="submit" style="background: none; border: 1px solid #ff3333; color: #ff3333; cursor: pointer; padding: 2px 10px;">
+                ログアウト
+            </button>
+        </form>
+    </div>
+
+    <div sec:authorize="isAnonymous()">
+        <span style="color: #ff3333;">⚠️ 未ログイン</span>
+        <a th:href="@{/}" style="text-decoration: none; margin-left: 15px;">
+            <button type="button" style="border-color: #00ffff; color: #00ffff; box-shadow: 0 0 10px #00ffff; background: transparent; cursor: pointer;">
+                ログインに戻る
+            </button>
+        </a>
+    </div>
+</div>
+
+<!-- タイトル欄 作成 -->
+<div class="create-form">
+    <form th:action="@{/threads/create}"
+          th:object="${thread}"
+          method="post"
+          style="width: 100%; display: flex; gap: 10px;">
+        <input type="text" name="title" placeholder="タイトル" required
+               style="flex-grow: 1; border-color: #ff00de; box-shadow: 0 0 5px #ff00de;">
+        <button type="submit"
+                style="white-space: nowrap;">
+            作成
+        </button>
+
+        <div th:if="${#fields.hasErrors('title')}"
+             th:errors="*{title}"
+             class="valid-error"
+             style="color: #ff3333; font-size: 0.8rem;"></div>
+    </form>
+</div>
+
+<!-- スレット一覧 -->
+<div id="thread-list"
+     class="thread-container">
+
+    <div th:each="t : ${threads}"
+         class="thread-card"
+         th:id="'thread-' + ${t.id}">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="flex-grow: 1;">
+                <div class="thread-title" th:text="${t.title}">タイトル</div>
+                <div style="font-size: 0.7rem; color: #666;" th:text="${#temporals.format(t.createdAt, 'yyyy-MM-dd HH:mm')}">日時</div>
+            </div>
+
+            <!-- 下矢印 -->
+            <button onclick="togglePosts(this)"
+                    th:data-thread-id="${t.id}"
+                    style="font-size: 20px; background: none; border: none; color: #00ffff; cursor: pointer; transform: rotate(0deg); transition: transform 0.3s;">
+                &#9660;
+            </button>
+        </div>
+
+        <div class="thread-author">
+            ユーザー名: <span th:text="${t.author.username}">ユーザー名</span>
+        </div>
+
+        <!-- スレット編集 -->
+        <div th:if="${username} == ${t.author.username}" style="display: flex; gap: 10px; margin-top: 10px;">
+            <button onclick="openEditModal(this)"
+                    th:data-id="${t.id}"
+                    th:data-content="${t.title}"
+                    data-type="thread"
+                    style="white-space: nowrap; background-color: #0088cc; color:white;">
+                編集
+            </button>
+
+            <!-- スレット削除 -->
+<!--            <form th:action="@{/threads/delete/{id}(id=${t.id})}" method="post">-->
+                <button type="button"
+                        th:onclick="'deleteThread(' + ${t.id} + ')'"
+                        style="white-space: nowrap; background-color:#cc0000; color: white;">
+                    削除
+                </button>
+<!--            </form>-->
+        </div>
+
+
+        <!-- メッセージのコンテナ -->
+        <div th:id="'posts-container-' + ${t.id}"
+             style="display: none; margin-top: 20px; border-top: 1px dashed #ff00de;">
+
+            <!-- メッセージ一覧 -->
+            <div th:each="p : ${postsMap.get(t.id)}"
+                 class="post-item"
+                 th:id="'post-' + ${p.id}"
+                 style="padding: 10px 0; border-bottom: 1px dashed #ff00de;">
+                <div style="font-size: 0.9rem; color: #ff00de;">
+                    <span th:text="${p.postNumber}">番号</span>.
+                    <span th:text="${p.author.username}"
+                          style="font-weight: bold;">ユーザー名</span>
+                    <span th:text="${#temporals.format(p.postDate, 'yyyy-MM-dd HH:mm')}"
+                          style="font-size: 0.7rem; color: #666; margin-left: 10px;">日時</span>
+                </div>
+
+                <div class="post-content" th:text="${p.content}">コメントの内容.</div>
+
+                <!-- メッセージ編集　-->
+                <div th:if="${username} == ${p.author.username}" style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button onclick="openEditModal(this)"
+                            th:data-id="${p.id}"
+                            th:data-content="${p.content}"
+                            data-type="post"
+                            style="white-space: nowrap; background-color: #0088cc; color:white; border: none; border-radius: 3px; padding: 4px 10px; font-size: 1rem; cursor: pointer;">
+                        編集
+                    </button>
+
+                    <!-- メッセージ一削除 -->
+<!--                    <form th:action="@{/post/delete/{id}(id=${p.id})}" method="post">-->
+                        <button type="button"
+                                th:onclick="'deletePost(' + ${p.id} + ')'"
+                                style="white-space: nowrap; background-color:#cc0000; color: white; border: none; border-radius: 3px; padding: 4px 10px; font-size: 1rem; cursor: pointer;">
+                            削除
+                        </button>
+<!--                    </form>-->
+                </div>
+            </div>
+
+            <div th:if="${postsMap.get(t.id).empty}"
+                 style="text-align: center; color: #666; padding: 10px;">
+                最初のメッセージを投稿しよう
+            </div>
+
+            <!-- 2. メッセージ投稿 -->
+            <div th:if="${username}" style="margin-top: 20px;">
+                <form th:action="@{/threads/{id}/post(id=${t.id})}"
+                      th:object="${post}" method="post">
+                    <textarea name="content" required
+                              style="width: 97%; height: 100px; resize: none; padding: 8px; margin-bottom: 5px; border-color: #ff00de; box-shadow: 0 0 3px #ff00de;"></textarea>
+
+                    <div th:if="${#fields.hasErrors('content')}"
+                         th:errors="*{content}"
+                         class="valid-error"
+                         style="color: #ff3333; font-size: 0.8rem; margin-bottom: 10px;"></div>
+                    <button type="submit">投稿</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeEditModal()">&times;</span>
+            <h2 id="modalTitle" style="color: #00ffff;">編集</h2>
+
+            <form id="editForm" method="post">
+                <label id="modalLabel" for="editInput" style="color: #fff;">内容:</label>
+                <textarea id="editInput" name="content" required
+                       style="width: 97%; height: 100px; resize: none; padding: 10px; margin-bottom: 20px; border-color: #ff00de; box-shadow: 0 0 5px #ff00de;"></textarea>
+
+                <button type="submit" style="white-space: nowrap;">保存</button>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${threads.empty}" th:style="'text-align: center; color: #666;'">
+        一覧は空です
+    </div>
+
+    <div th:replace="~{fragments/threadPostCreateTemplates :: threadPostCreateTemplates}"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <script th:src="@{/js/WebSocket/threadSocket/threadCreate.js}"></script>
+    <script th:src="@{/js/WebSocket/threadSocket/threadDelete.js}"></script>
+    <script th:src="@{/js/WebSocket/threadSocket/threadEdit.js}"></script>
+
+    <script th:src="@{/js/WebSocket/postSocket/postCreate.js}"></script>
+    <script th:src="@{/js/WebSocket/postSocket/postDelete.js}"></script>
+    <script th:src="@{/js/WebSocket/postSocket/postEdit.js}"></script>
+
+    <script th:src="@{/js/WebSocket/socketConnection.js}"></script>
+
+    <script th:src="@{/js/postsscript.js}"></script>
+
+    <script th:src="@{/js/windowscript.js}"></script>
+    <script th:src="@{/js/errorscript.js}"></script>
+
+    <script th:inline="javascript">
+        var currentUsername = [[${username}]];
+    </script>
+</body>
+</html>
